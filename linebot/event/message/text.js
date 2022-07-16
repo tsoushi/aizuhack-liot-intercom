@@ -1,3 +1,5 @@
+import * as utility from "../../../utility.js"
+
 export const textEvent = async (event, client) => {
     let message;
 
@@ -5,10 +7,7 @@ export const textEvent = async (event, client) => {
     //メッセージのテキストごとに条件分岐
     switch (event.message.text) {
         default: {
-            message = {
-                type: 'text',
-                text: 'このメッセージの返信には対応していません...',
-            };
+            message = utility.makeTextMessage('このメッセージの返信には対応していません...');
             break;
         }
     }
