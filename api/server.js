@@ -1,4 +1,5 @@
 // 外部モジュールの読み込み
+import line from '@line/bot-sdk';
 import express from 'express';
 import { middleware } from '@line/bot-sdk';
 import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
@@ -10,6 +11,10 @@ import { index } from '../linebot/bot.js';
 const PORT = process.env.PORT || 3000;
 const app = express();
 
+const client = new line.Client({
+    channelAccessToken: process.env.channelAccessToken,
+});
+
 // /にアクセスがあった時、Deploy succeededと返す
 app.get('/', (req, res) => { res.send('Deploy succeeded'); });
 
@@ -17,6 +22,10 @@ app.get('/', (req, res) => { res.send('Deploy succeeded'); });
 app.post('/webhook', middleware({
     channelSecret: process.env.channelSecret,
 }), index);
+
+app.post('/visitor', (req, res) => {
+    // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
+});
 
 app.listen(PORT); // サーバーを起動する
 console.log(`Server running at ${PORT}`);

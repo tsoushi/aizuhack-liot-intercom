@@ -93,7 +93,7 @@ export const index = (req, res) => {
 
             // messageがundefinedでなければ
             if (message !== undefined) {
-                console.log(`返信メッセージ: ${JSON.stringify(message)}`)
+                console.log(`返信メッセージ: ${JSON.stringify(message)}`);
                 // メッセージを返信
                 client.replyMessage(event.replyToken, message)
                     .then(() => {
