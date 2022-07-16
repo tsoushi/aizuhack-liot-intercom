@@ -25,6 +25,12 @@ app.post('/webhook', middleware({
 
 app.post('/visitor', (req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
+    const message = {
+        type: 'text',
+        text: '訪問者が来ました',
+    };
+    
+    client.pushMessage(process.env.userId, message);
 });
 
 app.listen(PORT); // サーバーを起動する
