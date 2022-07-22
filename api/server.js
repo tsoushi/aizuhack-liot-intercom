@@ -6,6 +6,7 @@ import 'dotenv/config'; // このモジュールで.envから環境変数を設�
 
 // ファイルの読み込み
 import { index } from '../linebot/bot.js';
+import { makeTextMessage } from '../utility.js';
 
 //
 const PORT = process.env.PORT || 3000;
@@ -25,10 +26,7 @@ app.post('/webhook', middleware({
 
 app.post('/visitor', (req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
-    const message = {
-        type: 'text',
-        text: '訪問者が来ました',
-    };
+    const message = makeTextMessage("訪問者が来ました");
     
     client.pushMessage(process.env.userId, message);
 });
