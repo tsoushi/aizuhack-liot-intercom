@@ -24,10 +24,9 @@ app.post('/webhook', middleware({
     channelSecret: process.env.channelSecret,
 }), index);
 
-app.post('/visitor', (req, res) => {
+app.post('/intercom/notice', express.json(),(req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
-    const message = makeTextMessage("訪問者が来ました");
-    
+    const message = makeTextMessage(`${req.body.datetime}\n訪問者が来ました`);
     client.pushMessage(process.env.userId, message);
 });
 
