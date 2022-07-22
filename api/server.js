@@ -30,5 +30,12 @@ app.post('/intercom/notice', express.json(),(req, res) => {
     client.pushMessage(process.env.userId, message);
 });
 
+app.post('/intercom/text',express.json(),(req, res) => {
+    // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
+    const message = makeTextMessage(`訪問者からのメッセージ:\n${req.body.text}`);
+    client.pushMessage(process.env.userId, message);
+    console.log(message);
+})
+
 app.listen(PORT); // サーバーを起動する
 console.log(`Server running at ${PORT}`);
