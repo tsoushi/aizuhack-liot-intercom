@@ -28,13 +28,14 @@ app.post('/intercom/notice', express.json(),(req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
     const message = makeTextMessage(`${req.body.datetime}\n訪問者が来ました`);
     client.pushMessage(process.env.userId, message);
+    res.send("ok");
 });
 
 app.post('/intercom/text',express.json(),(req, res) => {
     // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
     const message = makeTextMessage(`訪問者からのメッセージ:\n${req.body.text}`);
     client.pushMessage(process.env.userId, message);
-    console.log(message);
+    res.send("ok");
 })
 
 app.listen(PORT); // サーバーを起動する
