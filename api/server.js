@@ -6,14 +6,18 @@ import 'dotenv/config'; // このモジュールで.envから環境変数を設�
 
 // ファイルの読み込み
 import { index } from '../linebot/bot.js';
+import * as utility from '../utility.js';
 
-//
+// 初期処理
 const PORT = process.env.PORT || 3000;
 const app = express();
 
 const client = new line.Client({
     channelAccessToken: process.env.channelAccessToken,
 });
+
+// public ディレクトリを公開する
+app.use('/static', express.static('public'));
 
 // /にアクセスがあった時、Deploy succeededと返す
 app.get('/', (req, res) => { res.send('Deploy succeeded'); });
@@ -31,6 +35,18 @@ app.post('/visitor', (req, res) => {
     };
     
     client.pushMessage(process.env.userId, message);
+});
+
+// 訪問者の写真が送られてくる
+app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
+    const data = Buffer.from(req.body.data, 'base64');
+    utility.genImageUrlFromBytes(data, req)
+        .then((imageUrl) => {
+            const message = utility.makeVisitorsImageMessage(imageUrl);
+            client.pushMessage(process.env.userId, message);
+        });
+
+    res.send('ok');
 });
 
 app.listen(PORT); // サーバーを起動する
