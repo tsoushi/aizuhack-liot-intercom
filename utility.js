@@ -43,9 +43,7 @@ export const genImageUrlFromBytes = async (data, req) => {
     const fileName = genFileNameFromDatetime('jpg');
     const path = 'public/image/' + fileName;
     
-    fs.mkdir('public/image', {recursive: true}, (err) => {
-        console.error('ディレクトリの作成に失敗: ', err);
-    });
+    fs.mkdirSync('public/image', {recursive: true});
     fs.writeFileSync(path, data);
 
     const url = 'https' + '://' + req.get( 'host' ) + '/static/image/' + fileName;
