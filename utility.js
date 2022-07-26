@@ -1,4 +1,7 @@
 import * as fs from 'fs';
+import sqlite3 from 'sqlite3';
+
+const DATABASE_PATH = 'database.sqlite3';
 
 export const makeTextMessage = (text) => {
     return {
@@ -32,10 +35,7 @@ export const makeVisitorsImageMessage = (imageUrl) => {
 // 日時からファイル名を生成する
 export const genFileNameFromDatetime = (ext, date=Date.now()) => {
     const dt = new Date(date);
-    dt.j
-    return '' + dt.getFullYear() + dt.getMonth() + dt.getDate() 
-    + dt.getHours() + dt.getMinutes() + dt.getSeconds() + dt.getMilliseconds()
-    + '.' + ext;
+    return dt.toISOString().replace(/[\-T:\.]/g, '_').replace('Z', '') + '.' + ext;
 }
 
 // 画像データを保存して画像へのURLをリターンする（非同期）
@@ -43,13 +43,18 @@ export const genImageUrlFromBytes = async (data, req) => {
     const fileName = genFileNameFromDatetime('jpg');
     const path = 'public/image/' + fileName;
     
-    fs.mkdir('public/image', {recursive: true}, (err) => {
-        console.error('ディレクトリの作成に失敗: ', err);
-    });
+    fs.mkdirSync('public/image', {recursive: true});
     fs.writeFileSync(path, data);
 
     const url = 'https' + '://' + req.get( 'host' ) + '/static/image/' + fileName;
     return url;
+}
+
+export const initDatabase = () => {
+    const db = new sqlite3.Database(DATABASE_PATH);
+    const sqlQuery = fs.readFileSync('./schema.sql');
+    db.run(sqlQuery.toString());
+    db.close();
 }
 
 export const addDeviceID = (user_id, device_id) => {
@@ -68,5 +73,3 @@ export const getUserIdFromDeviceID = (device_id) => {
         });
     });
 }
-
-
