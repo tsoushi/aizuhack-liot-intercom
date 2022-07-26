@@ -32,7 +32,7 @@ app.post('/webhook', middleware({
 app.post('/intercom/notice', express.json(),(req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
     const message = utility.makeTextMessage(`${req.body.datetime}\n訪問者が来ました`);
-    client.pushMessage(process.env.userId, message);
+    client.pushMessage(utility.getUserIdFromDeviceID(req.body.id), message);
     res.send("ok");
 });
 
@@ -40,7 +40,7 @@ app.post('/intercom/notice', express.json(),(req, res) => {
 app.post('/intercom/text',express.json(),(req, res) => {
     // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
     const message = utility.makeTextMessage(`訪問者からのメッセージ:\n${req.body.text}`);
-    client.pushMessage(process.env.userId, message);
+    client.pushMessage(utility.getUserIdFromDeviceID(req.body.id), message);
     res.send("ok");
 })
 
@@ -50,7 +50,7 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
     utility.genImageUrlFromBytes(data, req)
         .then((imageUrl) => {
             const message = utility.makeVisitorsImageMessage(imageUrl);
-            client.pushMessage(process.env.userId, message);
+            client.pushMessage(utility.getUserIdFromDeviceID(req.body.id), message);
         });
 
     res.send('ok');
