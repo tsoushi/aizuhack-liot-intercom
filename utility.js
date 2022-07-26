@@ -58,7 +58,7 @@ export const initDatabase = () => {
 }
 
 export const addDeviceID = (user_id, device_id) => {
-const db = new sqlite3.Datebase(DATABASE_PATH);
+const db = new sqlite3.Database(DATABASE_PATH);
 
 db.run("insert into users values(?,?)", user_id, device_id);
 
@@ -67,7 +67,7 @@ db.run("insert into users values(?,?)", user_id, device_id);
 
 export const getUserIdFromDeviceID = (device_id) => {
     return new Promise((resolve, reject) => {
-        const db = new sqlite3.Datebase(DATABASE_PATH);
+        const db = new sqlite3.Database(DATABASE_PATH);
         db.get("select * from users where device_id = ?", device_id, (err, row) => {
             resolve(row["user_id"]);
         });
