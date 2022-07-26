@@ -1,4 +1,7 @@
 import * as fs from 'fs';
+import sqlite3 from 'sqlite3';
+
+const DATABASE_PATH = 'database.sqlite3';
 
 export const makeTextMessage = (text) => {
     return {
@@ -47,3 +50,9 @@ export const genImageUrlFromBytes = async (data, req) => {
     return url;
 }
 
+export const initDatabase = () => {
+    const db = new sqlite3.Database(DATABASE_PATH);
+    const sqlQuery = fs.readFileSync('./schema.sql');
+    db.run(sqlQuery.toString());
+    db.close();
+}
