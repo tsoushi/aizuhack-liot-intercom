@@ -53,23 +53,24 @@ export const genImageUrlFromBytes = async (data, req) => {
 export const initDatabase = () => {
     const db = new sqlite3.Database(DATABASE_PATH);
     const sqlQuery = fs.readFileSync('./schema.sql');
-    db.run(sqlQuery.toString());
-    db.close();
+    db.run(sqlQuery.toString(), () => {
+        db.close();
+    });
 }
 
 export const addDeviceID = (user_id, device_id) => {
-const db = new sqlite3.Database(DATABASE_PATH);
-
-db.run("insert into users values(?,?)", user_id, device_id);
-
+    const db = new sqlite3.Database(DATABASE_PATH);
+    db.run("insert into users values(?,?)", [user_id, device_id], () => {
+        db.close();
+    });
 }
-
 
 export const getUserIdFromDeviceID = (device_id) => {
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(DATABASE_PATH);
         db.get("select * from users where device_id = ?", device_id, (err, row) => {
             resolve(row["user_id"]);
+            db.close();
         });
     });
 }
