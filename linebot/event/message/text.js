@@ -9,6 +9,11 @@ export const textEvent = async (event, client) => {
         utility.addDeviceID(event.userId, event.message.text.substr(9));
         return;
     }
+
+    if (event.message.text.startsWith('removedeviceid=')) {
+        utility.removeDeviceID(event.message.text.substr(15));
+        return;
+    }
     
     switch (event.message.text) {
         default: {

@@ -74,3 +74,10 @@ export const getUserIdFromDeviceID = (deviceId) => {
         });
     });
 }
+
+export const removeDeviceID = (deviceId) => {
+    const db = new sqlite3.Database(DATABASE_PATH);
+    db.run("delete from users where device_id = ?", [deviceId], () => {
+        db.close();
+    });
+}
