@@ -14,6 +14,9 @@ import { utility } from '../utility.js';
 const PORT = process.env.PORT || 3000;
 const app = express();
 
+// サーバーの初期設定
+app.enable('trust proxy'); // X-Forwarde-Protoヘッダを信頼する
+
 const client = new line.Client({
     channelAccessToken: process.env.channelAccessToken,
 });
