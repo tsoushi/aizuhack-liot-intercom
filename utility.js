@@ -58,17 +58,17 @@ export const initDatabase = () => {
     });
 }
 
-export const addDeviceID = (user_id, device_id) => {
+export const addDeviceID = (userId, deviceId) => {
     const db = new sqlite3.Database(DATABASE_PATH);
-    db.run("insert into users values(?,?)", [user_id, device_id], () => {
+    db.run("insert into users values(?,?)", [userId, deviceId], () => {
         db.close();
     });
 }
 
-export const getUserIdFromDeviceID = (device_id) => {
+export const getUserIdFromDeviceID = (deviceId) => {
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(DATABASE_PATH);
-        db.get("select * from users where device_id = ?", device_id, (err, row) => {
+        db.get("select * from users where device_id = ?", deviceId, (err, row) => {
             resolve(row["user_id"]);
             db.close();
         });
