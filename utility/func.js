@@ -14,6 +14,6 @@ export const genImageUrlFromBytes = async (data, req) => {
     fs.mkdirSync('public/image', {recursive: true});
     fs.writeFileSync(path, data);
 
-    const url = 'https' + '://' + req.get( 'host' ) + '/static/image/' + fileName;
+    const url = req.protocol + '://' + req.get( 'host' ) + '/static/image/' + fileName;
     return url;
 }
