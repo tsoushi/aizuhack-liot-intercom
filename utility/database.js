@@ -5,8 +5,14 @@ const DATABASE_PATH = 'database.sqlite3';
 
 export const initDatabase = () => {
     const db = new sqlite3.Database(DATABASE_PATH);
-    const sqlQuery = fs.readFileSync('./schema.sql');
-    db.run(sqlQuery.toString(), () => {
+    db.serialize(() => {
+        const sqlQueries = fs.readFileSync('./schema.sql').toString().split(');');
+        for (let sqlQuery of sqlQueries) {
+            if (sqlQuery) {
+                sqlQuery += ');';
+                db.run(sqlQuery);
+            }
+        }
         db.close();
     });
 }
