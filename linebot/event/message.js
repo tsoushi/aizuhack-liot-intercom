@@ -7,32 +7,32 @@
 import { textEvent } from './message/text.js';
 // import { videoEvent } from './message/video.js';
 
-export const messageFunc = async (event, client) => {
+export const messageFunc = async (event) => {
     let message;
 
     // メッセージタイプごとの条件分岐
     switch (event.message.type) {
         // テキスト
         case 'text': {
-            message = await textEvent(event, client);
+            message = await textEvent(event);
             break;
         }
 
         // 画像
         case 'image': {
-            // message = imageEvent(event, client);
+            // message = imageEvent(event);
             break;
         }
 
         // 動画
         case 'vide': {
-            // message = videoEvent(event, client);
+            // message = videoEvent(event);
             break;
         }
 
         // 音声
         case 'audio': {
-            // message = audioEvent(event, client);
+            // message = audioEvent(event);
             break;
         }
 
