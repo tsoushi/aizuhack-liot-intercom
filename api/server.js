@@ -44,7 +44,7 @@ app.post('/intercom/text',express.json(),(req, res) => {
         utility.lineClient.pushMessage(userId, message);
     })
     res.send("ok");
-})
+});
 
 // 訪問者の写真が送られてくる
 app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
@@ -58,6 +58,11 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
         });
 
     res.send('ok');
+});
+
+app.post('/intercom/get-message',express.json(),(req, res) => {
+    // Iotからの返信メッセージの要求
+    res.json({"text":`${utility.database.getReplyMessage(req.body.id, utility.database.addReplyMessage(req.body.id))}`});
 });
 
 

@@ -15,6 +15,11 @@ export const textEvent = async (event) => {
         return;
     }
     
+    if (event.message.text.startsWith('reply=')) {
+        utility.database.addReplyMessage(event.message.text.substr(6));
+        return;
+    }
+
     switch (event.message.text) {
         default: {
             message = utility.makeMessage.text('このメッセージの返信には対応していません...');
