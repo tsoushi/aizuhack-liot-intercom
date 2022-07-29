@@ -1,5 +1,4 @@
 // 外部モジュールの読み込み
-import line from '@line/bot-sdk';
 import express from 'express';
 import { middleware } from '@line/bot-sdk';
 import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
@@ -17,10 +16,6 @@ const app = express();
 // サーバーの初期設定
 app.enable('trust proxy'); // X-Forwarde-Protoヘッダを信頼する
 
-const client = new line.Client({
-    channelAccessToken: process.env.channelAccessToken,
-});
-
 // public ディレクトリを公開する
 app.use('/static', express.static('public'));
 
@@ -36,7 +31,7 @@ app.post('/intercom/notice', express.json(), (req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
     const message = utility.makeMessage.text(`${req.body.datetime}\n訪問者が来ました`);
     utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
-        client.pushMessage(userId, message);
+        utility.lineClient.pushMessage(userId, message);
     })
     res.send("ok");
 });
@@ -46,7 +41,7 @@ app.post('/intercom/text',express.json(),(req, res) => {
     // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
     const message = utility.makeMessage.text(`訪問者からのメッセージ:\n${req.body.text}`);
     utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
-        client.pushMessage(userId, message);
+        utility.lineClient.pushMessage(userId, message);
     })
     res.send("ok");
 })
@@ -58,7 +53,7 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
         .then((imageUrl) => {
             const message = utility.makeMessage.visitorsImage(imageUrl);
             utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
-                client.pushMessage(userId, message);
+                utility.lineClient.pushMessage(userId, message);
             })
         });
 
