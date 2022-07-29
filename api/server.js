@@ -7,7 +7,7 @@ import 'dotenv/config'; // このモジュールで.envから環境変数を設�
 // ファイルの読み込み
 import { index } from '../linebot/bot.js';
 
-import * as utility from '../utility.js';
+import { utility } from '../utility.js';
 
 
 // 初期処理
@@ -31,8 +31,8 @@ app.post('/webhook', middleware({
 
 app.post('/intercom/notice', express.json(), (req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
-    const message = utility.makeTextMessage(`${req.body.datetime}\n訪問者が来ました`);
-    utility.getUserIdFromDeviceID(req.body.id).then((userId) => {
+    const message = utility.makeMessage.text(`${req.body.datetime}\n訪問者が来ました`);
+    utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
         client.pushMessage(userId, message);
     })
     res.send("ok");
@@ -41,8 +41,8 @@ app.post('/intercom/notice', express.json(), (req, res) => {
 
 app.post('/intercom/text',express.json(),(req, res) => {
     // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
-    const message = utility.makeTextMessage(`訪問者からのメッセージ:\n${req.body.text}`);
-    utility.getUserIdFromDeviceID(req.body.id).then((userId) => {
+    const message = utility.makeMessage.text(`訪問者からのメッセージ:\n${req.body.text}`);
+    utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
         client.pushMessage(userId, message);
     })
     res.send("ok");
@@ -51,10 +51,10 @@ app.post('/intercom/text',express.json(),(req, res) => {
 // 訪問者の写真が送られてくる
 app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
     const data = Buffer.from(req.body.data, 'base64');
-    utility.genImageUrlFromBytes(data, req)
+    utility.func.genImageUrlFromBytes(data, req)
         .then((imageUrl) => {
-            const message = utility.makeVisitorsImageMessage(imageUrl);
-            utility.getUserIdFromDeviceID(req.body.id).then((userId) => {
+            const message = utility.makeMessage.visitorsImage(imageUrl);
+            utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
                 client.pushMessage(userId, message);
             })
         });
