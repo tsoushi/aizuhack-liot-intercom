@@ -1,6 +1,6 @@
 // モジュール読み込み
-import line from '@line/bot-sdk';
 import crypto from 'crypto';
+import { utility } from '../utility.js';
 
 // 各イベントごとの処理をするファイルの読み込み
 import { messageFunc } from './event/message.js';
@@ -13,9 +13,6 @@ import { postbackFunc } from './event/postback.js';
 // import { memberJoinedFunc } from './event/memberJoined.js';
 // import { memberLeftFunc } from './event/memberLeft.js';
 
-const client = new line.Client({
-    channelAccessToken: process.env.channelAccessToken,
-});
 
 export const index = (req, res) => {
     // 署名検証
@@ -35,7 +32,7 @@ export const index = (req, res) => {
             switch (event.type) {
                 // メッセージ
                 case 'message': {
-                    message = await messageFunc(event, client);
+                    message = await messageFunc(event);
                     break;
                 }
 
@@ -95,7 +92,7 @@ export const index = (req, res) => {
             if (message !== undefined) {
                 console.log(`返信メッセージ: ${JSON.stringify(message)}`);
                 // メッセージを返信
-                client.replyMessage(event.replyToken, message)
+                utility.lineClient.replyMessage(event.replyToken, message)
                     .then(() => {
                         console.log('Reply succeded');
                     }).catch((err) => {

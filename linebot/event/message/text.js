@@ -1,6 +1,6 @@
 import { utility } from "../../../utility.js"
 
-export const textEvent = async (event, client) => {
+export const textEvent = async (event) => {
     let message;
 
     console.log('テキストメッセージを受信: ' + event.message.text);
