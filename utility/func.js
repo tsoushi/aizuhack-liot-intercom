@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+const replyTextQue = [];
 
 // 日時からファイル名を生成する
 export const genFileNameFromDatetime = (ext, date=Date.now()) => {

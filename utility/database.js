@@ -34,3 +34,21 @@ export const removeDeviceID = (deviceId) => {
         db.close();
     });
 }
+
+export const addReplyMessage = (deviceId, replyText) => {
+    const db = new sqlite3.Database(DATABASE_PATH);
+    db.run("insert into reply_message_queue values(?,?)", [deviceId, replyText], () => {
+        db.close();
+    });
+}
+
+export const getReplyMessage = (deviceId) => {
+    return new Promise((resolve, reject) => {
+        const db = new sqlite3.Database(DATABASE_PATH);
+        db.get("select * from reply_message_queue where device_id = ?", deviceId, (err, row) => {
+            resolve(row["device_id"]);
+            db.run("delete from users where device_id = ?", [deviceId]);
+            db.close();
+        });
+    });
+}
