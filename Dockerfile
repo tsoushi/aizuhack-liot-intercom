@@ -5,9 +5,9 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 RUN npm install
-RUN npm run initdb
 
 COPY . .
+RUN npm run initdb
 
 EXPOSE 3000
 
