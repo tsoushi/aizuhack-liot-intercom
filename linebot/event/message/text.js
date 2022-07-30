@@ -6,17 +6,23 @@ export const textEvent = async (event) => {
     console.log('テキストメッセージを受信: ' + event.message.text);
     //メッセージのテキストごとに条件分岐
     if(event.message.text.startsWith('deviceid=')) {
-        utility.database.addDeviceID(event.userId, event.message.text.substr(9));
+        utility.database.addDeviceID(event.source.userId, event.message.text.substr(9));
         return;
     }
 
-    if (event.message.text.startsWith('removedeviceid=')) {
-        utility.database.removeDeviceID(event.message.text.substr(15));
+    if (event.message.text == 'removedeviceid') {
+        utility.database.removeDeviceIDByUserID(event.source.userId);
         return;
     }
     
     if (event.message.text.startsWith('reply=')) {
-        utility.database.addReplyMessage(event.message.text.substr(6));
+        utility.database.addReplyMessageByUserId(event.source.userId, event.message.text.substr(6))
+            .catch(() => {
+                utility.lineClient.replyMessage(
+                    event.replyToken,
+                    utility.makeMessage.text('デバイスIDが登録されていません')
+                );
+            });
         return;
     }
 
