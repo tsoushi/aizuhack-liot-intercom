@@ -16,6 +16,14 @@
         "line": {
             "appenders": ["out"],
             "level": "all"
+        },
+        "system": {
+            "appenders": ["out"],
+            "level": "all"
+        },
+        "database": {
+            "appenders": ["out"],
+            "level": "debug"
         }
     }
 }

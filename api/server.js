@@ -6,7 +6,7 @@ import log4js from 'log4js';
 
 
 // ファイルの読み込み
-import { logger, accessLogger } from '../logger.js';
+import { logger, accessLogger, systemLogger } from '../logger.js';
 import { index } from '../linebot/bot.js';
 import { utility } from '../utility.js';
 
@@ -19,7 +19,11 @@ const app = express();
 app.enable('trust proxy'); // X-Forwarde-Protoヘッダを信頼する
 
 // アクセスログの設定
-app.use(log4js.connectLogger(accessLogger, {format: ':method :url : :status'}));
+app.use((req, res, next) => {
+    accessLogger.info(`${req.method} ${req.url}`);
+    next();
+});
+app.use(log4js.connectLogger(accessLogger, {format: ':method :url -> :status'}));
 
 // public ディレクトリを公開する
 app.use('/static', express.static('public'));
@@ -70,6 +74,7 @@ app.post('/intercom/get-message',express.json(), async (req, res) => {
     const replyMessage = await utility.database.getReplyMessage(req.body.id);
     if (replyMessage === null) res.json({exist: false});
     else {
+        systemLogger.debug(`IoT側への返信メッセージ - deviceID: ${req.body.id} - message: ${replyMessage}`)
         res.json({
             exist: true,
             text: replyMessage

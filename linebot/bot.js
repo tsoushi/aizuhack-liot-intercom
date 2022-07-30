@@ -1,5 +1,6 @@
 // モジュール読み込み
 import crypto from 'crypto';
+import { lineLogger } from '../logger.js';
 import { utility } from '../utility.js';
 
 // 各イベントごとの処理をするファイルの読み込み
@@ -90,14 +91,9 @@ export const index = (req, res) => {
 
             // messageがundefinedでなければ
             if (message !== undefined) {
-                console.log(`返信メッセージ: ${JSON.stringify(message)}`);
+                lineLogger.debug(`返信メッセージ: ${JSON.stringify(message)}`);
                 // メッセージを返信
-                utility.lineClient.replyMessage(event.replyToken, message)
-                    .then(() => {
-                        console.log('Reply succeded');
-                    }).catch((err) => {
-                        console.log(`${err}`)
-                    });
+                utility.lineClient.replyMessage(event.replyToken, message).catch(() => {});
             }
         });
     // 署名検証に失敗した場合
