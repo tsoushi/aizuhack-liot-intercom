@@ -69,12 +69,12 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
     res.send('ok');
 });
 
-app.post('/intercom/get-message',express.json(), async (req, res) => {
+app.get('/intercom/get-message', async (req, res) => {
     // Iotからの返信メッセージの要求
-    const replyMessage = await utility.database.getReplyMessage(req.body.id);
+    const replyMessage = await utility.database.getReplyMessage(req.query.id);
     if (replyMessage === null) res.json({exist: false});
     else {
-        systemLogger.debug(`IoT側への返信メッセージ - deviceID: ${req.body.id} - message: ${replyMessage}`)
+        systemLogger.debug(`IoT側への返信メッセージ - deviceID: ${req.query.id} - message: ${replyMessage}`)
         res.json({
             exist: true,
             text: replyMessage
