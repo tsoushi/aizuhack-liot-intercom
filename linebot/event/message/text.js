@@ -35,7 +35,7 @@ export const textEvent = async (event) => {
     if (text.startsWith('reply=')) {
         if (!await isDeviceIdRegistered(event)) return nullDeviceIdMessage;
         utility.database.addReplyMessageByUserId(userId, text.substr(6));
-        return utility.makeMessage.text('返信メッセージを送信しました！');
+        return utility.makeMessage.text('メッセージを送信しました');
     }
 
     return;

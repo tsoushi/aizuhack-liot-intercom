@@ -9,7 +9,7 @@ export const genFileNameFromDatetime = (ext, date=Date.now()) => {
 
 // 画像データを保存して画像へのURLをリターンする（非同期）
 export const genImageUrlFromBytes = async (data, req) => {
-    systemLogger.debug('画像データからURLを生成')
+    systemLogger.trace('画像データからURLを生成')
     const fileName = genFileNameFromDatetime('jpg');
     const path = 'public/image/' + fileName;
     
@@ -17,6 +17,6 @@ export const genImageUrlFromBytes = async (data, req) => {
     fs.writeFileSync(path, data);
 
     const url = req.protocol + '://' + req.get( 'host' ) + '/static/image/' + fileName;
-    systemLogger.debug('画像データからURLを生成 -> 完了 url: '+url);
+    systemLogger.trace('画像データからURLを生成 -> 完了 url: '+url);
     return url;
 }

@@ -23,7 +23,7 @@
         },
         "database": {
             "appenders": ["out"],
-            "level": "debug"
+            "level": "all"
         }
     }
 }
