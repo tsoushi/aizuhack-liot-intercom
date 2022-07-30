@@ -1,4 +1,6 @@
 import { utility } from "../../../utility.js"
+import { lineLogger } from '../../../logger.js';
+
 
 const nullDeviceIdMessage = utility.makeMessage.text('デバイスIDを登録してください');
 
@@ -16,8 +18,8 @@ export const textEvent = async (event) => {
     const text = event.message.text;
     const userId = event.source.userId;
 
-    console.log('テキストメッセージを受信: ' + text);
-    
+    lineLogger.debug('テキストメッセージを受信: ' + text);
+
     //メッセージのテキストごとに条件分岐
     if(text.startsWith('deviceid=')) {
         utility.database.addDeviceID(userId, text.substr(9));

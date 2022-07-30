@@ -2,10 +2,12 @@
 import express from 'express';
 import { middleware } from '@line/bot-sdk';
 import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
+import log4js from 'log4js';
+
 
 // ファイルの読み込み
+import { logger, accessLogger } from '../logger.js';
 import { index } from '../linebot/bot.js';
-
 import { utility } from '../utility.js';
 
 
@@ -15,6 +17,9 @@ const app = express();
 
 // サーバーの初期設定
 app.enable('trust proxy'); // X-Forwarde-Protoヘッダを信頼する
+
+// アクセスログの設定
+app.use(log4js.connectLogger(accessLogger, {format: ':method :url : :status'}));
 
 // public ディレクトリを公開する
 app.use('/static', express.static('public'));
@@ -74,4 +79,4 @@ app.post('/intercom/get-message',express.json(), async (req, res) => {
 
 
 app.listen(PORT); // サーバーを起動する
-console.log(`Server running at ${PORT}`);
+logger.info(`Server running at ${PORT}`);
