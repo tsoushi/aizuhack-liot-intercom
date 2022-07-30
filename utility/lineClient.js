@@ -19,6 +19,28 @@ export const pushMessage = (userId, message) => {
     });
 }
 
+// 複数のユーザー宛にメッセージを送信する
+// userId は配列で指定。空配列でも可。
+// 戻り値: bool
+// １人以上に送信できた場合はtrue。userIdsが空の場合はfalse。
+export const multicast = (userIds, message) => {
+    return new Promise((resolve, reject) => {
+        if (userIds.length) {
+            client.multicast(userIds, message)
+                .then(() => {
+                    lineLogger.debug('multicast -> 成功 - to: ' + userIds);
+                    resolve(true);
+                }).catch((err) => {
+                    lineLogger.warn('multicast -> 失敗 - to: ' + userIds);
+                    reject(err);
+                });
+        } else {
+            lineLogger.debug('multicast -> 送信先なし');
+            resolve(false);
+        }
+    });
+}
+
 export const replyMessage = (token, message) => {
     return new Promise((resolve, reject) => {
         client.replyMessage(token, message)
