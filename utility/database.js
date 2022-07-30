@@ -72,6 +72,20 @@ export const addReplyMessage = (deviceId, replyText) => {
     });
 }
 
+// userIDからデバイスIDを取得して、返信予約キューにテキストを追加する
+// 戻り値：Promise
+// デバイスIDが見つからなかった場合、rejectされる
+export const addReplyMessageByUserId = (userId, replyText) => {
+    return new Promise(async (resolve, reject) => {
+        const deviceId = await getDeviceIDFromUserID(userId);
+        if (deviceId === null) reject();
+        else {
+            addReplyMessage(deviceId, replyText);
+            resolve();
+        }
+    });
+}
+
 // 返信予約キューから一つ取り出す
 export const getReplyMessage = (deviceId) => {
     return new Promise((resolve, reject) => {
