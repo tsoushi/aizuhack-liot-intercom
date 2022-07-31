@@ -10,6 +10,8 @@ import { logger, accessLogger, systemLogger } from '../logger.js';
 import { index } from '../linebot/bot.js';
 import { utility } from '../utility.js';
 
+utility.database.initDatabase();
+
 
 // 初期処理
 const PORT = process.env.PORT || 3000;
