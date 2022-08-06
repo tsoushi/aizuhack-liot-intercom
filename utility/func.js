@@ -1,7 +1,7 @@
 import { systemLogger } from '../logger.js';
 import { Storage } from '@google-cloud/storage';
 
-const storage = new Storage({keyFilename: 'key.json'});
+const storage = new Storage();
 const BUCKETNAME = 'liot-intercom';
 const CLOUD_STORAGE_URL = 'https://storage.googleapis.com/';
 
