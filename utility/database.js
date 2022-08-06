@@ -18,6 +18,7 @@ export const pool = mysql.createPool({
 export const createConnection = (multipleStatements=false) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
+            if (err) databaseLogger.error(err);
             resolve(connection);
         });
     });
