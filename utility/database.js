@@ -1,37 +1,32 @@
 import * as mysql from 'mysql';
 import * as fs from 'fs';
 import { databaseLogger } from '../logger.js';
+import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
 
 const DATABASE_PATH = 'database.sqlite3';
 
+export const pool = mysql.createPool({
+    multipleStatements: true,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    socketPath: process.env.DB_SOCKET
+});
+
 export const createConnection = (multipleStatements=false) => {
-    let connection;
-    if (process.env.DB_HOST) {
-        connection = mysql.createConnection({
-            multipleStatements: multipleStatements,
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: process.env.DB_NAME,
-            port: process.env.DB_PORT,
-            socketPath: process.env.DB_SOCKET
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) databaseLogger.error(err);
+            resolve(connection);
         });
-    } else {
-        connection = mysql.createPool({
-            multipleStatements: multipleStatements,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: process.env.DB_NAME,
-            socketPath: process.env.DB_SOCKET
-        });
-    }
-    connection.connect();
-    return connection;
+    });
 }
 
-export const initDatabase = () => {
+export const initDatabase = async () => {
     databaseLogger.info('データベースを初期化中');
-    const db = createConnection(true);
+    const db = await createConnection(true);
     db.query(fs.readFileSync('./schema.sql').toString('utf-8'), (err, results) => {
         if (err) throw err;
     });
@@ -39,9 +34,9 @@ export const initDatabase = () => {
     databaseLogger.info('データベースを初期化中 -> 完了');
 }
 
-export const addDeviceID = (userId, deviceId) => {
+export const addDeviceID = async (userId, deviceId) => {
     databaseLogger.trace(`デバイスIDの追加 - userID: ${userId} - deviceID: ${deviceId}`)
-    const db = createConnection();
+    const db = await createConnection();
     db.query('DELETE FROM users WHERE user_id = ?', [userId]);
     db.query("insert into users values(?,?)", [userId, deviceId]);
     db.end();
@@ -50,9 +45,9 @@ export const addDeviceID = (userId, deviceId) => {
 // デバイスIDに紐づいたuserIDをすべて取得する。
 // 戻り値：userIDの配列
 export const getUserIDsFromDeviceID = (deviceId) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         databaseLogger.trace('デバイスIDからユーザーIDを取得');
-        const db = createConnection();
+        const db = await createConnection();
         db.query("select * from users where device_id = ?", [deviceId], (err, rows) => {
             const userIdList = [];
             for (const row of rows) {
@@ -68,9 +63,9 @@ export const getUserIDsFromDeviceID = (deviceId) => {
 // ユーザーIDに紐づいたdeviceIDを取得する
 // 戻り値 : deviceID | null
 export const getDeviceIDFromUserID = (userId) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         databaseLogger.trace('ユーザーIDからデバイスIDを検索中')
-        const db = createConnection();
+        const db = await createConnection();
         db.query("select * from users where user_id = ?", [userId], (err, rows) => {
             if (rows[0]) {
                 databaseLogger.trace('ユーザーIDからデバイスIDを検索中 -> 完了 : '+rows[0]['device_id']);
@@ -86,17 +81,17 @@ export const getDeviceIDFromUserID = (userId) => {
 }
 
 // 指定したuserIdのdeviceIdとの紐づけを削除する
-export const removeDeviceIDByUserID = (userId) => {
+export const removeDeviceIDByUserID = async (userId) => {
     databaseLogger.trace(`userID[${userId}]のデバイス紐づけを削除`);
-    const db = createConnection();
+    const db = await createConnection();
     db.query("delete from users where user_id = ?", [userId]);
     db.end();
 }
 
 // 返信予約キューにテキストを追加する
-export const addReplyMessage = (deviceId, replyText) => {
+export const addReplyMessage = async (deviceId, replyText) => {
     databaseLogger.trace(`返信予約キューに追加 - deviceID : ${deviceId} - message : ${replyText}`);
-    const db = createConnection();
+    const db = await createConnection();
     db.query("insert into reply_message_queue(device_id, message) values(?,?)", [deviceId, replyText]);
     db.end();
 }
@@ -117,8 +112,8 @@ export const addReplyMessageByUserId = (userId, replyText) => {
 
 // 返信予約キューから一つ取り出す
 export const getReplyMessage = (deviceId) => {
-    return new Promise((resolve, reject) => {
-        const db = createConnection(true);
+    return new Promise(async (resolve, reject) => {
+        const db = await createConnection(true);
         db.query("select * from reply_message_queue where device_id = ?;delete from reply_message_queue where device_id = ?;", [deviceId, deviceId], (err, results) => {
             databaseLogger.warn(err);
             if (results[0][0]) {
