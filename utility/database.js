@@ -1,31 +1,29 @@
 import * as mysql from 'mysql';
 import * as fs from 'fs';
 import { databaseLogger } from '../logger.js';
+import { resolve } from 'path';
 
 const DATABASE_PATH = 'database.sqlite3';
 
+const pool = mysql.createPool({
+    multipleStatements: true,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    socketPath: process.env.DB_SOCKET
+});
+
 export const createConnection = (multipleStatements=false) => {
-    let connection;
-    connection = mysql.createConnection({
-        multipleStatements: multipleStatements,
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        database: process.env.DB_NAME,
-        port: process.env.DB_PORT,
-        socketPath: process.env.DB_SOCKET
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            resolve(connection);
+        });
     });
-    databaseLogger.mark(connection);
-    databaseLogger.mark(process.env.DB_SOCKET);
-    connection.connect((err) => {
-        databaseLogger.error(err);
-    });
-    return connection;
 }
 
-export const initDatabase = () => {
+export const initDatabase = async () => {
     databaseLogger.info('データベースを初期化中');
-    const db = createConnection(true);
+    const db = await createConnection(true);
     db.query(fs.readFileSync('./schema.sql').toString('utf-8'), (err, results) => {
         if (err) throw err;
     });
