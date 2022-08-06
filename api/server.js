@@ -60,7 +60,7 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
     const data = Buffer.from(req.body.data, 'base64');
     utility.func.genImageUrlFromBytes(data, req)
         .then((imageUrl) => {
-            const message = utility.makeMessage.visitorsImage(imageUrl);
+            const message = utility.makeMessage.visitorsImage(imageUrl, req.body.datetime);
             utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
                 utility.lineClient.multicast(userIds, message).catch(() => {});
             })
