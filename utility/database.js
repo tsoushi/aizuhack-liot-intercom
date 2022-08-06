@@ -16,6 +16,7 @@ export const createConnection = (multipleStatements=false) => {
             port: process.env.DB_PORT,
             socketPath: process.env.DB_SOCKET
         });
+        connection.connect();
     } else {
         connection = mysql.createPool({
             multipleStatements: multipleStatements,
@@ -25,8 +26,6 @@ export const createConnection = (multipleStatements=false) => {
             socketPath: process.env.DB_SOCKET
         });
     }
-    databaseLogger.mark(connection);
-    connection.connect();
     return connection;
 }
 
