@@ -5,14 +5,26 @@ import { databaseLogger } from '../logger.js';
 const DATABASE_PATH = 'database.sqlite3';
 
 export const createConnection = (multipleStatements=false) => {
-    const connection = mysql.createConnection({
-        multipleStatements: multipleStatements,
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        database: process.env.DB_NAME,
-        port: process.env.DB_PORT
-    });
+    let connection;
+    if (process.env.DB_HOST) {
+        connection = mysql.createConnection({
+            multipleStatements: multipleStatements,
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+            port: process.env.DB_PORT,
+            socketPath: process.env.DB_SOCKET
+        });
+    } else {
+        connection = mysql.createPool({
+            multipleStatements: multipleStatements,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+            socketPath: process.env.DB_SOCKET
+        });
+    }
     connection.connect();
     return connection;
 }
