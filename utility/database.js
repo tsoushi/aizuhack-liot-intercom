@@ -15,7 +15,11 @@ export const createConnection = (multipleStatements=false) => {
         port: process.env.DB_PORT,
         socketPath: process.env.DB_SOCKET
     });
-    connection.connect();
+    databaseLogger.mark(connection);
+    databaseLogger.mark(process.env.DB_SOCKET);
+    connection.connect((err) => {
+        databaseLogger.error(err);
+    });
     return connection;
 }
 
