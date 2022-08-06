@@ -8,7 +8,7 @@ const CLOUD_STORAGE_URL = 'https://storage.googleapis.com/';
 // 日時からファイル名を生成する
 export const genFileNameFromDatetime = (ext, date=Date.now()) => {
     const dt = new Date(date);
-    return dt.toLocaleString().replace(/[\/\s\:]/g, '_') + '.' + ext;
+    return dt.toISOString().replace(/[\-\s\:T\.]/g, '_').replace('X', '') + '.' + ext;
 }
 
 // 画像データを保存して画像へのURLをリターンする（非同期）
