@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon api/server.js"
+    "start": "nodemon api/server.js",
+    "initdb": "node script/initdb.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
     "@line/bot-sdk": "^7.5.0",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "log4js": "^6.6.1",
     "sqlite3": "^5.0.10"
   },
   "devDependencies": {

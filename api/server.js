@@ -2,10 +2,12 @@
 import express from 'express';
 import { middleware } from '@line/bot-sdk';
 import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
+import log4js from 'log4js';
+
 
 // ファイルの読み込み
+import { logger, accessLogger, systemLogger } from '../logger.js';
 import { index } from '../linebot/bot.js';
-
 import { utility } from '../utility.js';
 
 
@@ -15,6 +17,13 @@ const app = express();
 
 // サーバーの初期設定
 app.enable('trust proxy'); // X-Forwarde-Protoヘッダを信頼する
+
+// アクセスログの設定
+app.use((req, res, next) => {
+    accessLogger.info(`${req.method} ${req.url}`);
+    next();
+});
+app.use(log4js.connectLogger(accessLogger, {format: ':method :url -> :status'}));
 
 // public ディレクトリを公開する
 app.use('/static', express.static('public'));
@@ -30,8 +39,8 @@ app.post('/webhook', middleware({
 app.post('/intercom/notice', express.json(), (req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
     const message = utility.makeMessage.text(`${req.body.datetime}\n訪問者が来ました`);
-    utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
-        utility.lineClient.pushMessage(userId, message);
+    utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
+        utility.lineClient.multicast(userIds, message).catch(() => {});
     })
     res.send("ok");
 });
@@ -40,8 +49,8 @@ app.post('/intercom/notice', express.json(), (req, res) => {
 app.post('/intercom/text',express.json(),(req, res) => {
     // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
     const message = utility.makeMessage.text(`訪問者からのメッセージ:\n${req.body.text}`);
-    utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
-        utility.lineClient.pushMessage(userId, message);
+    utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
+        utility.lineClient.multicast(userIds, message).catch(()=>{});
     })
     res.send("ok");
 });
@@ -52,19 +61,27 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
     utility.func.genImageUrlFromBytes(data, req)
         .then((imageUrl) => {
             const message = utility.makeMessage.visitorsImage(imageUrl);
-            utility.database.getUserIdFromDeviceID(req.body.id).then((userId) => {
-                utility.lineClient.pushMessage(userId, message);
+            utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
+                utility.lineClient.multicast(userIds, message).catch(() => {});
             })
         });
 
     res.send('ok');
 });
 
-app.post('/intercom/get-message',express.json(),(req, res) => {
+app.get('/intercom/get-message', async (req, res) => {
     // Iotからの返信メッセージの要求
-    res.json({"text":`${utility.database.getReplyMessage(req.body.id, utility.database.addReplyMessage(req.body.id))}`});
+    const replyMessage = await utility.database.getReplyMessage(req.query.id);
+    if (replyMessage === null) res.json({exist: false});
+    else {
+        systemLogger.debug(`IoT側への返信メッセージ - deviceID: ${req.query.id} - message: ${replyMessage}`)
+        res.json({
+            exist: true,
+            text: replyMessage
+        });
+    }
 });
 
 
 app.listen(PORT); // サーバーを起動する
-console.log(`Server running at ${PORT}`);
+logger.info(`Server running at ${PORT}`);

@@ -1,0 +1,29 @@
+{
+    "appenders": {
+        "out": {
+            "type": "stdout"
+        }
+    },
+    "categories": {
+        "default": {
+            "appenders": ["out"],
+            "level": "all"
+        },
+        "access": {
+            "appenders": ["out"],
+            "level": "all"
+        },
+        "line": {
+            "appenders": ["out"],
+            "level": "all"
+        },
+        "system": {
+            "appenders": ["out"],
+            "level": "all"
+        },
+        "database": {
+            "appenders": ["out"],
+            "level": "all"
+        }
+    }
+}
