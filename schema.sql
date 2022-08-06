@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS users(
-    user_id TEXT UNIQUE,
+    user_id TEXT,
     device_id TEXT
 );
 CREATE TABLE IF NOT EXISTS reply_message_queue(
-    id INTEGER PRIMARY KEY,
+    id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     device_id TEXT,
     message TEXT
 );
