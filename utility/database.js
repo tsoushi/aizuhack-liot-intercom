@@ -30,7 +30,7 @@ export const initDatabase = async () => {
     db.query(fs.readFileSync('./schema.sql').toString('utf-8'), (err, results) => {
         if (err) throw err;
     });
-    db.end();
+    db.release();
     databaseLogger.info('データベースを初期化中 -> 完了');
 }
 
@@ -39,7 +39,7 @@ export const addDeviceID = async (userId, deviceId) => {
     const db = await createConnection();
     db.query('DELETE FROM users WHERE user_id = ?', [userId]);
     db.query("insert into users values(?,?)", [userId, deviceId]);
-    db.end();
+    db.release();
 }
 
 // デバイスIDに紐づいたuserIDをすべて取得する。
@@ -56,7 +56,7 @@ export const getUserIDsFromDeviceID = (deviceId) => {
             databaseLogger.trace('デバイスIDからユーザーIDを取得 -> 検索結果 '+userIdList.length+' users');
             resolve(userIdList);
         });
-        db.end();
+        db.release();
     });
 }
 
@@ -76,7 +76,7 @@ export const getDeviceIDFromUserID = (userId) => {
                 resolve(null);
             }
         });
-        db.end();
+        db.release();
     });
 }
 
@@ -85,7 +85,7 @@ export const removeDeviceIDByUserID = async (userId) => {
     databaseLogger.trace(`userID[${userId}]のデバイス紐づけを削除`);
     const db = await createConnection();
     db.query("delete from users where user_id = ?", [userId]);
-    db.end();
+    db.release();
 }
 
 // 返信予約キューにテキストを追加する
@@ -93,7 +93,7 @@ export const addReplyMessage = async (deviceId, replyText) => {
     databaseLogger.trace(`返信予約キューに追加 - deviceID : ${deviceId} - message : ${replyText}`);
     const db = await createConnection();
     db.query("insert into reply_message_queue(device_id, message) values(?,?)", [deviceId, replyText]);
-    db.end();
+    db.release();
 }
 
 // userIDからデバイスIDを取得して、返信予約キューにテキストを追加する
@@ -125,6 +125,6 @@ export const getReplyMessage = (deviceId) => {
                 resolve(null);
             }
         });
-        db.end();
+        db.release();
     });
 }
