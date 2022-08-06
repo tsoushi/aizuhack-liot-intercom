@@ -11,8 +11,8 @@ export const pool = mysql.createPool({
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT
-    //socketPath: process.env.DB_SOCKET
+    port: process.env.DB_PORT,
+    socketPath: process.env.DB_SOCKET
 });
 
 export const createConnection = (multipleStatements=false) => {
