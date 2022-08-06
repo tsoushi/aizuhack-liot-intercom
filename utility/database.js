@@ -114,11 +114,11 @@ export const addReplyMessageByUserId = (userId, replyText) => {
 export const getReplyMessage = (deviceId) => {
     return new Promise(async (resolve, reject) => {
         const db = await createConnection(true);
-        db.query("select * from reply_message_queue where device_id = ?;delete from reply_message_queue where device_id = ?;", [deviceId, deviceId], (err, results) => {
-            databaseLogger.warn(err);
-            if (results[0][0]) {
+        db.query("select * from reply_message_queue where device_id = ?;", [deviceId, deviceId], (err, result) => {
+            if (result[0]) {
+                db.query('delete from reply_message_queue where id = ?;', [result[0]['id']]);
                 databaseLogger.trace('返信予約キューから取り出し - deviceID: '+deviceId)
-                resolve(results[0][0]['message']);
+                resolve(result[0]['message']);
             }
             else {
                 databaseLogger.trace('返信予約キューから取り出し - メッセージなし - deviceID: '+deviceId)
