@@ -1,5 +1,9 @@
 import * as fs from 'fs';
 import { systemLogger } from '../logger.js';
+import { Storage } from '@google-cloud/storage';
+
+const storage = new Storage({keyFilename: 'key.json'});
+const bucketName = 'liot-intercom'
 
 // 日時からファイル名を生成する
 export const genFileNameFromDatetime = (ext, date=Date.now()) => {
@@ -19,4 +23,9 @@ export const genImageUrlFromBytes = async (data, req) => {
     const url = req.protocol + '://' + req.get( 'host' ) + '/static/image/' + fileName;
     systemLogger.trace('画像データからURLを生成 -> 完了 url: '+url);
     return url;
+}
+
+// gcsに画像をアップロード
+export const uploadFromMemory = async (destFileName, content) => {
+  await storage.bucket(bucketName).file(destFileName).save(content);
 }
