@@ -25,6 +25,7 @@ export const createConnection = (multipleStatements=false) => {
             socketPath: process.env.DB_SOCKET
         });
     }
+    databaseLogger.mark(connection);
     connection.connect();
     return connection;
 }
