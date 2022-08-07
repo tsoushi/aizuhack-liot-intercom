@@ -19,7 +19,7 @@ export const genImageUrlFromBytes = async (data) => {
 
    uploadFromMemory(path, data);
 
-    const url = CLOUD_STORAGE_URL + BUCKETNAME + '/' + fileName;
+    const url = CLOUD_STORAGE_URL + BUCKETNAME + '/image/' + fileName;
     systemLogger.trace('画像データからURLを生成 -> 完了 url: '+url);
     return url;
 }
