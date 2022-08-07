@@ -1,44 +1,54 @@
-import sqlite3 from 'sqlite3';
+import * as mysql from 'mysql';
 import * as fs from 'fs';
 import { databaseLogger } from '../logger.js';
+import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
 
 const DATABASE_PATH = 'database.sqlite3';
 
+export const pool = mysql.createPool({
+    multipleStatements: true,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    socketPath: process.env.DB_SOCKET
+});
 
-export const initDatabase = () => {
-    databaseLogger.info('データベースを初期化中');
-    const db = new sqlite3.Database(DATABASE_PATH);
-    db.serialize(() => {
-        const sqlQueries = fs.readFileSync('./schema.sql').toString().split(');');
-        for (let sqlQuery of sqlQueries) {
-            if (sqlQuery) {
-                sqlQuery += ');';
-                db.run(sqlQuery);
-            }
-        }
-        databaseLogger.info('データベースを初期化中 -> 完了');
-        db.close();
+export const createConnection = (multipleStatements=false) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) databaseLogger.error(err);
+            resolve(connection);
+        });
     });
 }
 
-export const addDeviceID = (userId, deviceId) => {
-    databaseLogger.trace(`デバイスIDの追加 - userID: ${userId} - deviceID: ${deviceId}`)
-    const db = new sqlite3.Database(DATABASE_PATH);
-    db.serialize(() => {
-        db.run('DELETE FROM users WHERE user_id = ?', [userId]);
-        db.run("insert into users values(?,?)", [userId, deviceId]);
-        db.close();
+export const initDatabase = async () => {
+    databaseLogger.info('データベースを初期化中');
+    const db = await createConnection(true);
+    db.query(fs.readFileSync('./schema.sql').toString('utf-8'), (err, results) => {
+        if (err) throw err;
     });
+    db.release();
+    databaseLogger.info('データベースを初期化中 -> 完了');
+}
+
+export const addDeviceID = async (userId, deviceId) => {
+    databaseLogger.trace(`デバイスIDの追加 - userID: ${userId} - deviceID: ${deviceId}`)
+    const db = await createConnection();
+    db.query('DELETE FROM users WHERE user_id = ?', [userId]);
+    db.query("insert into users values(?,?)", [userId, deviceId]);
+    db.release();
 }
 
 // デバイスIDに紐づいたuserIDをすべて取得する。
 // 戻り値：userIDの配列
 export const getUserIDsFromDeviceID = (deviceId) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         databaseLogger.trace('デバイスIDからユーザーIDを取得');
-        const db = new sqlite3.Database(DATABASE_PATH);
-        db.all("select * from users where device_id = ?", deviceId, (err, rows) => {
-            db.close();
+        const db = await createConnection();
+        db.query("select * from users where device_id = ?", [deviceId], (err, rows) => {
             const userIdList = [];
             for (const row of rows) {
                 userIdList.push(row['user_id']);
@@ -46,45 +56,44 @@ export const getUserIDsFromDeviceID = (deviceId) => {
             databaseLogger.trace('デバイスIDからユーザーIDを取得 -> 検索結果 '+userIdList.length+' users');
             resolve(userIdList);
         });
+        db.release();
     });
 }
 
 // ユーザーIDに紐づいたdeviceIDを取得する
 // 戻り値 : deviceID | null
 export const getDeviceIDFromUserID = (userId) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         databaseLogger.trace('ユーザーIDからデバイスIDを検索中')
-        const db = new sqlite3.Database(DATABASE_PATH);
-        db.get("select * from users where user_id = ?", userId, (err, row) => {
-            db.close();
-            if (row) {
-                databaseLogger.trace('ユーザーIDからデバイスIDを検索中 -> 完了 : '+row['device_id']);
-                resolve(row['device_id']);
+        const db = await createConnection();
+        db.query("select * from users where user_id = ?", [userId], (err, rows) => {
+            if (rows[0]) {
+                databaseLogger.trace('ユーザーIDからデバイスIDを検索中 -> 完了 : '+rows[0]['device_id']);
+                resolve(rows[0]['device_id']);
             }
             else {
                 databaseLogger.trace('ユーザーIDからデバイスIDを検索中 -> 完了 : 検索結果なし');
                 resolve(null);
             }
         });
+        db.release();
     });
 }
 
 // 指定したuserIdのdeviceIdとの紐づけを削除する
-export const removeDeviceIDByUserID = (userId) => {
+export const removeDeviceIDByUserID = async (userId) => {
     databaseLogger.trace(`userID[${userId}]のデバイス紐づけを削除`);
-    const db = new sqlite3.Database(DATABASE_PATH);
-    db.run("delete from users where user_id = ?", [userId], () => {
-        db.close();
-    });
+    const db = await createConnection();
+    db.query("delete from users where user_id = ?", [userId]);
+    db.release();
 }
 
 // 返信予約キューにテキストを追加する
-export const addReplyMessage = (deviceId, replyText) => {
+export const addReplyMessage = async (deviceId, replyText) => {
     databaseLogger.trace(`返信予約キューに追加 - deviceID : ${deviceId} - message : ${replyText}`);
-    const db = new sqlite3.Database(DATABASE_PATH);
-    db.run("insert into reply_message_queue(device_id, message) values(?,?)", [deviceId, replyText], () => {
-        db.close();
-    });
+    const db = await createConnection();
+    db.query("insert into reply_message_queue(device_id, message) values(?,?)", [deviceId, replyText]);
+    db.release();
 }
 
 // userIDからデバイスIDを取得して、返信予約キューにテキストを追加する
@@ -103,19 +112,19 @@ export const addReplyMessageByUserId = (userId, replyText) => {
 
 // 返信予約キューから一つ取り出す
 export const getReplyMessage = (deviceId) => {
-    return new Promise((resolve, reject) => {
-        const db = new sqlite3.Database(DATABASE_PATH);
-        db.get("select * from reply_message_queue where device_id = ?", deviceId, (err, row) => {
-            if (row) {
+    return new Promise(async (resolve, reject) => {
+        const db = await createConnection(true);
+        db.query("select * from reply_message_queue where device_id = ?;", [deviceId, deviceId], (err, result) => {
+            if (result[0]) {
+                db.query('delete from reply_message_queue where id = ?;', [result[0]['id']]);
                 databaseLogger.trace('返信予約キューから取り出し - deviceID: '+deviceId)
-                db.run("delete from reply_message_queue where id = ?", row['id']);
-                resolve(row['message']);
+                resolve(result[0]['message']);
             }
             else {
                 databaseLogger.trace('返信予約キューから取り出し - メッセージなし - deviceID: '+deviceId)
                 resolve(null);
             }
-            db.close();
         });
+        db.release();
     });
 }
