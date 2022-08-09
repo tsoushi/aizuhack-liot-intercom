@@ -128,3 +128,41 @@ export const getReplyMessage = (deviceId) => {
         db.release();
     });
 }
+
+// 文脈を登録する
+// 引数: (ユーザーID, 文脈名)
+export const setContext = async (userId, context) => {
+    const db = await createConnection();
+    db.query('INSERT INTO context(user_id, context) VALUES(?, ?);', [userId, context], (err, result) => {
+        if (err) throw err;
+    });
+    db.release();
+}
+
+// 文脈を取得する
+// 引数: (ユーザーID)
+// 戻り値: 文脈名 | null
+export const getContext = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        const db = await createConnection();
+        db.query('SELECT user_id, context FROM context WHERE user_id = ?;', [userId], (err, result) => {
+            if (err) reject(err);
+            if (result[0]) {
+                resolve(result[0]['context']);
+            } else {
+                resolve(null);
+            }
+        });
+        db.release();
+    });
+}
+
+// 文脈を削除する
+// 引数: (文脈名)
+export const deleteContext = async (userId) => {
+    const db = await createConnection();
+    db.query('DELETE FROM context WHERE user_id = ?;', [userId], (err, result) => {
+        if (err) throw err;
+    });
+    db.release();
+}
