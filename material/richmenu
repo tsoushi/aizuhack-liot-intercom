@@ -1,0 +1,59 @@
+{
+  "size": {
+    "width": 2500,
+    "height": 1686
+  },
+  "selected": true,
+  "name": "リッチメニュー 1",
+  "chatBarText": "メニュー",
+  "areas": [
+    {
+      "bounds": {
+        "x": 21,
+        "y": 21,
+        "width": 1208,
+        "height": 804
+      },
+      "action": {
+        "type": "message",
+        "text": "履歴"
+      }
+    },
+    {
+      "bounds": {
+        "x": 1271,
+        "y": 21,
+        "width": 1217,
+        "height": 812
+      },
+      "action": {
+        "type": "message",
+        "text": "会話"
+      }
+    },
+    {
+      "bounds": {
+        "x": 1271,
+        "y": 858,
+        "width": 1212,
+        "height": 821
+      },
+      "action": {
+        "type": "message",
+        "text": "ヘルプ"
+      }
+    },
+    {
+      "bounds": {
+        "x": 21,
+        "y": 857,
+        "width": 1208,
+        "height": 814
+      },
+      "action": {
+        "type": "message",
+        "text": "登録"
+      }
+    }
+  ]
+}
