@@ -7,3 +7,7 @@ CREATE TABLE IF NOT EXISTS reply_message_queue(
     device_id TEXT,
     message TEXT
 );
+CREATE TABLE IF NOT EXISTS context(
+    user_id TEXT,
+    context TEXT
+);
