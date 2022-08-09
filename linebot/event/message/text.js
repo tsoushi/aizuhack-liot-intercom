@@ -1,7 +1,7 @@
 import { utility } from "../../../utility.js"
 import { lineLogger } from '../../../logger.js';
-import { getContext, setContext } from "../../../utility/database.js";
-import { use } from "express/lib/application";
+
+
 
 
 const nullDeviceIdMessage = utility.makeMessage.text('デバイスIDを登録してください');
@@ -22,13 +22,13 @@ export const textEvent = async (event) => {
 
     lineLogger.debug('テキストメッセージを受信: ' + text);
 
-    if (getContext(userId) == "registerMode") {
+    if (utility.database.getContext(userId) == "registerMode") {
         utility.database.addDeviceID(userId, text);
         utility.database.deleteContext(userId);
         return utility.makeMessage.text(`デバイスID「${text}」を登録しました`);
     }
 
-    if (getContext(userId) == "talkMode") {
+    if (utility.database.getContext(userId) == "talkMode") {
         if (!await isDeviceIdRegistered(event)) return nullDeviceIdMessage;
         utility.database.addReplyMessageByUserId(userId, text);
         utility.database.deleteContext(userId);
@@ -54,12 +54,12 @@ export const textEvent = async (event) => {
     }
 
     if (text == '登録'){
-        await setContext(userId, 'registerMode');
+        await utility.database.setContext(userId, 'registerMode');
         return utility.makeMessage.text('デバイスIDを入力してください');
     }
 
     if (text == '会話') {
-        await setContext(userId, 'talkMode');
+        await utility.database.setContext(userId, 'talkMode');
         return utility.makeMessage.text('返信するメッセージを入力してください');
     }
 
