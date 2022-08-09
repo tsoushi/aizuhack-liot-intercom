@@ -22,13 +22,13 @@ export const textEvent = async (event) => {
 
     lineLogger.debug('テキストメッセージを受信: ' + text);
 
-    if (utility.database.getContext(userId) == "registerMode") {
+    if (await utility.database.getContext(userId) == "registerMode") {
         utility.database.addDeviceID(userId, text);
         utility.database.deleteContext(userId);
         return utility.makeMessage.text(`デバイスID「${text}」を登録しました`);
     }
 
-    if (utility.database.getContext(userId) == "talkMode") {
+    if (await utility.database.getContext(userId) == "talkMode") {
         if (!await isDeviceIdRegistered(event)) return nullDeviceIdMessage;
         utility.database.addReplyMessageByUserId(userId, text);
         utility.database.deleteContext(userId);
