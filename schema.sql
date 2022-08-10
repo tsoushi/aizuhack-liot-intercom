@@ -11,3 +11,8 @@ CREATE TABLE IF NOT EXISTS context(
     user_id TEXT,
     context TEXT
 );
+CREATE TABLE IF NOT EXISTS visitor_images(
+    device_id TEXT,
+    created_at TEXT,
+    image_url TEXT
+);

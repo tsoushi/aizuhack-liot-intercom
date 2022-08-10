@@ -3,6 +3,8 @@ import * as fs from 'fs';
 import { databaseLogger } from '../logger.js';
 import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
 
+import * as func from './func.js';
+
 const DATABASE_PATH = 'database.sqlite3';
 
 export const pool = mysql.createPool({
@@ -165,4 +167,33 @@ export const deleteContext = async (userId) => {
         if (err) throw err;
     });
     db.release();
+}
+
+// ログに訪問者の画像を追加する
+export const addVisitorImageLog = async (deviceId, datetime, imageUrl) => {
+    const db = await createConnection();
+    db.query('INSERT INTO visitor_images(device_id, created_at, image_url) VALUES(?, ?, ?);', [deviceId, func.dateToDatabaseDate(datetime), imageUrl], (err, result) => {
+        if (err) throw err;
+    });
+    db.release();
+}
+
+// 訪問者の画像のログを取得する
+export const getVisitorImageLog = (deviceId, limit=5) => {
+    return new Promise(async (resolve, reject) => {
+        const db = await createConnection();
+        db.query('SELECT device_id, created_at, image_url FROM visitor_images WHERE device_id = ? LIMIT ?;', [deviceId, limit], (err, rows) => {
+            if (err) throw err;
+            const ret = [];
+            for (const row of rows) {
+                ret.push({
+                    deviceId: row['device_id'],
+                    datetime: new Date(row['created_at']),
+                    imageUrl: row['image_url']
+                });
+            }
+            resolve(ret);
+        });
+        db.release();
+    });
 }

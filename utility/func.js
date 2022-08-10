@@ -28,3 +28,7 @@ export const genImageUrlFromBytes = async (data) => {
 export const uploadFromMemory = async (destFileName, content) => {
   await storage.bucket(BUCKETNAME).file(destFileName).save(content);
 }
+
+export const dateToDatabaseDate = (date) => {
+  return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
