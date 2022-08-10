@@ -32,3 +32,7 @@ export const uploadFromMemory = async (destFileName, content) => {
 export const dateToDatabaseDate = (date) => {
   return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
+
+export const dateToLocaleString = (date) => {
+  return date.toLocaleString('js-JP', {timeZone: 'Asia/Tokyo'});
+}

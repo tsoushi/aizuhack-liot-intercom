@@ -38,7 +38,7 @@ app.post('/webhook', middleware({
 
 app.post('/intercom/notice', express.json(), (req, res) => {
     // IoTから送られてきたデータを整理して、LINEのテキストとしてPUSHメッセージを送る
-    const message = utility.makeMessage.text(`${req.body.datetime}\n訪問者が来ました`);
+    const message = utility.makeMessage.text(`${utility.func.dateToLocaleString(new Date(req.body.datetime))}\n訪問者が来ました`);
     utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
         utility.lineClient.multicast(userIds, message).catch(() => {});
     })
@@ -48,7 +48,7 @@ app.post('/intercom/notice', express.json(), (req, res) => {
 
 app.post('/intercom/text',express.json(),(req, res) => {
     // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
-    const message = utility.makeMessage.text(`訪問者からのメッセージ:\n${req.body.text}`);
+    const message = utility.makeMessage.text(`訪問者からのメッセージ:\n${utility.func.dateToLocaleString(new Date(req.body.text))}`);
     utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
         utility.lineClient.multicast(userIds, message).catch(()=>{});
     })
@@ -61,7 +61,7 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
     utility.func.genImageUrlFromBytes(data, req)
         .then((imageUrl) => {
             utility.database.addVisitorImageLog(req.body.id, new Date(req.body.datetime), imageUrl);
-            const message = utility.makeMessage.visitorsImage(imageUrl, req.body.datetime);
+            const message = utility.makeMessage.visitorsImage(imageUrl, utility.func.dateToLocaleString(new Date(req.body.datetime)));
             utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
                 utility.lineClient.multicast(userIds, message).catch(() => {});
             })
