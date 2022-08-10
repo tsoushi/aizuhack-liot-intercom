@@ -29,7 +29,6 @@ export const textEvent = async (event) => {
     }
 
     if (await utility.database.getContext(userId) == "talkMode") {
-        if (!await isDeviceIdRegistered(event)) return nullDeviceIdMessage;
         utility.database.addReplyMessageByUserId(userId, text);
         utility.database.deleteContext(userId);
         return utility.makeMessage.text('メッセージを送信しました');
@@ -59,8 +58,16 @@ export const textEvent = async (event) => {
     }
 
     if (text == '会話') {
+        if (!await isDeviceIdRegistered(event)) return nullDeviceIdMessage;
         await utility.database.setContext(userId, 'talkMode');
         return utility.makeMessage.text('返信するメッセージを入力してください');
+    }
+
+    if (text == '履歴') {
+        if (!await isDeviceIdRegistered(event)) return nullDeviceIdMessage;
+        const records = await utility.database.getVisitorImageLog(await utility.database.getDeviceIDFromUserID(userId), 5);
+        if (records.length == 0) return utility.makeMessage.text('訪問者の履歴が存在しません');
+        return utility.makeMessage.visitorsImageLog(records);
     }
 
     if (text == 'ヘルプ') {
