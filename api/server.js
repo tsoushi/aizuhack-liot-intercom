@@ -48,7 +48,7 @@ app.post('/intercom/notice', express.json(), (req, res) => {
 
 app.post('/intercom/text',express.json(),(req, res) => {
     // IoTから送られてきた音声のテキストをLINEのテキストとしてPUSHメッセージを送る
-    const message = utility.makeMessage.text(`訪問者からのメッセージ:\n${utility.func.dateToLocaleString(new Date(req.body.text))}`);
+    const message = utility.makeMessage.text(`訪問者からのメッセージ:\n${utility.func.dateToLocaleString(new Date(req.body.datetime))}`);
     utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
         utility.lineClient.multicast(userIds, message).catch(()=>{});
     })
