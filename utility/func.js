@@ -34,5 +34,5 @@ export const dateToDatabaseDate = (date) => {
 }
 
 export const dateToLocaleString = (date) => {
-  return date.toLocaleString('js-JP', {timeZone: 'Asia/Tokyo'});
+  return date.toLocaleString('ja-JP', {timeZone: 'Asia/Tokyo'});
 }
