@@ -13,7 +13,11 @@ export const pushMessage = (userId, message) => {
                 lineLogger.debug('pushMessage -> 成功 - to: ' + userId);
                 resolve();
             }).catch((err) => {
-                lineLogger.warn('pushMessage -> 失敗 - to: ' + userId);
+                lineLogger.warn('pushMessage -> 失敗 - ' + err.originalError.response.data.message);
+                const details = err.originalError.response.data.details;
+                for (const detail of details) {
+                    lineLogger.warn(`${detail.message} : ${detail.property}`)
+                }
                 reject(err);
             });
     });
@@ -31,7 +35,11 @@ export const multicast = (userIds, message) => {
                     lineLogger.debug('multicast -> 成功 - to: ' + userIds);
                     resolve(true);
                 }).catch((err) => {
-                    lineLogger.warn('multicast -> 失敗 - to: ' + userIds);
+                    lineLogger.warn('multicast -> 失敗 - ' + err.originalError.response.data.message);
+                    const details = err.originalError.response.data.details;
+                    for (const detail of details) {
+                        lineLogger.warn(`${detail.message} : ${detail.property}`)
+                    }
                     reject(err);
                 });
         } else {
@@ -48,7 +56,11 @@ export const replyMessage = (token, message) => {
                 lineLogger.debug('replyMessage -> 成功');
                 resolve();
             }).catch((err) => {
-                lineLogger.debug('replyMessage -> 失敗');
+                lineLogger.warn('replyMessage -> 失敗 - ' + err.originalError.response.data.message);
+                const details = err.originalError.response.data.details;
+                for (const detail of details) {
+                    lineLogger.warn(`${detail.message} : ${detail.property}`)
+                }
                 reject(err);
             });
     });
