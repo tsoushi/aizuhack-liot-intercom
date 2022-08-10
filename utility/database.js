@@ -184,7 +184,7 @@ export const getVisitorImageLog = (deviceId, limit=5) => {
     return new Promise(async (resolve, reject) => {
         databaseLogger.trace('訪問者の画像のログの取得')
         const db = await createConnection();
-        db.query('SELECT device_id, created_at, image_url FROM visitor_images WHERE device_id = ? LIMIT ?;', [deviceId, limit], (err, rows) => {
+        db.query('SELECT device_id, created_at, image_url FROM visitor_images WHERE device_id = ? ORDER BY created_at DESC LIMIT ?;', [deviceId, limit], (err, rows) => {
             if (err) throw err;
             const ret = [];
             for (const row of rows) {
