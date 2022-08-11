@@ -200,3 +200,12 @@ export const getVisitorImageLog = (deviceId, limit=5) => {
         db.release();
     });
 }
+
+export const removeVisitorImageLogByUrl = async (imageUrl) => {
+    databaseLogger.trace(`訪問者の画像のログを削除 - url: ${imageUrl}`)
+    const db = await createConnection();
+    db.query('DELETE FROM visitor_images WHERE image_url = ?;', [imageUrl], (err, result) => {
+        if (err) throw err;
+    });
+    db.release();
+}
