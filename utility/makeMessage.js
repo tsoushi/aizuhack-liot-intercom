@@ -10,30 +10,134 @@ export const visitorsImage = (imageUrl, date) => {
     return {
         type: 'flex',
         altText: 'This is a Flex Message',
-        contents: visitorsImageBubble(imageUrl, date)
+        contents: {
+            type: "bubble",
+            header: {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "text",
+                  text: "訪問者が来ました",
+                  weight: "bold",
+                  color: "#ffffff"
+                }
+              ],
+              backgroundColor: "#00a48d"
+            },
+            body: {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "box",
+                  layout: "vertical",
+                  contents: [
+                    {
+                      type: "text",
+                      text: date,
+                      color: "#999999"
+                    }
+                  ],
+                  paddingStart: "10px",
+                  paddingBottom: "10px"
+                },
+                {
+                  type: "image",
+                  url: imageUrl,
+                  size: "full",
+                  aspectMode: "fit",
+                  aspectRatio: "16:9"
+                },
+                {
+                  type: "box",
+                  layout: "vertical",
+                  contents: [
+                    {
+                      type: "button",
+                      action: {
+                        type: "message",
+                        label: "会話する",
+                        text: "会話"
+                      },
+                      style: "primary"
+                    },
+                    {
+                      type: "button",
+                      action: {
+                        type: "postback",
+                        label: "既読",
+                        data: "removeVisitorImageLog:" + imageUrl
+                      },
+                      style: "secondary",
+                      margin: "10px"
+                    }
+                  ],
+                  paddingAll: "20px"
+                }
+              ],
+              paddingAll: "0px"
+            },
+            styles: {
+              hero: {
+                separator: true
+              }
+            }
+        }
     }
 }
 
 const visitorsImageBubble = (imageUrl, date) => {
     return {
-        type: 'bubble',
-        hero: {
-          type: 'image',
-          url: imageUrl,
-          size: 'full'
-        },
-        body: {
-          type: 'box',
-          layout: 'vertical',
+        type: "bubble",
+        header: {
+          type: "box",
+          layout: "vertical",
           contents: [
             {
-              type: 'text',
+              type: "text",
               text: date,
-              size: 'xl',
-              align: 'center'
+              weight: "bold",
+              color: "#ffffff"
             }
           ],
-          paddingAll: 'md'
+          backgroundColor: "#00a48d"
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "image",
+              url: imageUrl,
+              size: "full",
+              aspectMode: "fit",
+              aspectRatio: "16:9"
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "button",
+                  action: {
+                    type: "postback",
+                    label: "既読",
+                    data: "removeVisitorImageLog:" + imageUrl
+                  },
+                  style: "primary",
+                  margin: "10px"
+                }
+              ],
+              paddingAll: "20px"
+            }
+          ],
+          paddingAll: "0px"
+        },
+        styles: {
+          hero: {
+            separator: true
+          }
         }
     }
 }
