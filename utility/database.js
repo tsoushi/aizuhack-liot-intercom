@@ -1,4 +1,4 @@
-import * as mysql from 'mysql';
+import * as mysql from 'mysql2';
 import * as fs from 'fs';
 import { databaseLogger } from '../logger.js';
 import 'dotenv/config'; // このモジュールで.envから環境変数を設定する

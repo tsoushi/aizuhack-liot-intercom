@@ -1,5 +1,6 @@
 import { systemLogger } from '../logger.js';
 import { Storage } from '@google-cloud/storage';
+import fs from 'fs';
 
 const storage = new Storage();
 const BUCKETNAME = 'liot-intercom';
@@ -15,11 +16,19 @@ export const genFileNameFromDatetime = (ext, date=Date.now()) => {
 export const genImageUrlFromBytes = async (data) => {
     systemLogger.trace('画像データからURLを生成')
     const fileName = genFileNameFromDatetime('jpg');
-    const path = 'image/' + fileName;
+    let path = 'image/' + fileName;
 
-    await uploadFromMemory(path, data);
+    let url;
+    // クラウドストレージが使用可能かどうか
+    if (!process.env.NO_CLOUD_STORAGE) {
+      await uploadFromMemory(path, data);
 
-    const url = CLOUD_STORAGE_URL + BUCKETNAME + '/image/' + fileName;
+      url = CLOUD_STORAGE_URL + BUCKETNAME + '/image/' + fileName;
+    } else {
+      // 使用不可の場合ローカルに保存
+      await saveToLocal('public/' + path, data);
+      url = process.env.HOSTNAME + '/static/' + path;
+    }
     systemLogger.trace('画像データからURLを生成 -> 完了 url: '+url);
     return url;
 }
@@ -27,6 +36,11 @@ export const genImageUrlFromBytes = async (data) => {
 // gcsに画像をアップロード
 export const uploadFromMemory = async (destFileName, content) => {
   await storage.bucket(BUCKETNAME).file(destFileName).save(content);
+}
+
+// ローカルのディレクトリに保存
+export const saveToLocal = async (destFileName, content) => {
+  fs.writeFileSync(destFileName, content);
 }
 
 export const dateToDatabaseDate = (date) => {
