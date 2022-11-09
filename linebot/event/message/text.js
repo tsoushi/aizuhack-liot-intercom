@@ -70,6 +70,12 @@ export const textEvent = async (event) => {
         return utility.makeMessage.visitorsImageLog(records);
     }
 
+    if (text == '顔認識登録') {
+        if (!await isDeviceIdRegistered(event)) return nullDeviceIdMessage;
+        utility.database.setContext(userId, 'sendRecogImage');
+        return utility.makeMessage.text('顔写真を送信してください');
+    }
+
     if (text == 'ヘルプ') {
         return utility.makeMessage.text('以下のメッセージに対しての応答\n履歴: 直近の訪問者の履歴を表示\n会話: 訪問者への返信メッセージを入力\n登録: デバイスIDの登録');
     }

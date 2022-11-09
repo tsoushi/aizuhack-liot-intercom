@@ -16,3 +16,8 @@ CREATE TABLE IF NOT EXISTS visitor_images(
     created_at TEXT,
     image_url TEXT
 );
+CREATE TABLE IF NOT EXISTS face_recog_image_queue(
+    id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    device_id TEXT,
+    image_url TEXT
+);

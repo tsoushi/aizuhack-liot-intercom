@@ -83,6 +83,24 @@ app.get('/intercom/get-message', async (req, res) => {
     }
 });
 
+// IoTからの顔認識用写真の要求
+// パスパラメータ: id=[デバイスID]
+// レスポンス
+// {
+//     exist: [true | false],
+//     url: [顔写真へのURL](existがtrueのときのみ)
+// }
+app.get('/intercom/recog-image-url', async (req, res) => {
+    const imageUrl = await utility.database.popFaceRecogImageQueue(req.query.id);
+    if (imageUrl === null) res.json({exist: false});
+    else {
+        systemLogger.debug(`IoT側へ顔認識用写真の登録 - deviceID: ${req.query.id} - url: ${imageUrl}`);
+        res.json({
+            exist: true,
+            url: imageUrl
+        });
+    }
+});
 
 app.listen(PORT); // サーバーを起動する
 logger.info(`Server running at ${PORT}`);

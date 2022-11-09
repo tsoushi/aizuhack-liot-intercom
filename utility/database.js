@@ -209,3 +209,32 @@ export const removeVisitorImageLogByUrl = async (imageUrl) => {
     });
     db.release();
 }
+
+// 顔認識用写真の送信キュー追加
+export const addFaceRecogImageQueue = async (deviceId, imageUrl) => {
+    databaseLogger.trace(`顔認識用写真の送信キュー追加 - url: ${imageUrl}`);
+    const db = await createConnection();
+    db.query('INSERT INTO face_recog_image_queue(device_id, image_url) VALUES(?, ?);', [deviceId, imageUrl], (err, result) => {
+        if (err) throw err;
+    });
+    db.release();
+}
+
+// 顔認識写真の送信キューから一つ取り出す
+export const popFaceRecogImageQueue = (deviceId) => {
+    return new Promise(async (resolve, reject) => {
+        const db = await createConnection();
+        db.query('SELECT id, device_id, image_url FROM face_recog_image_queue WHERE device_id = ? LIMIT 1;', [deviceId], (err, result) => {
+            if (err) reject(err);
+            if (result[0]) {
+                databaseLogger.trace(`顔認識用写真の送信キュー取り出し - deviceId: ${deviceId} - url: ${result[0]['image_url']}`);
+                db.query('DELETE FROM face_recog_image_queue WHERE id = ?;', result[0]['id']);
+                resolve(result[0]['image_url']);
+            } else {
+                databaseLogger.trace(`顔認識用写真の送信キュー取り出し - deviceId: ${deviceId} - キューなし`);
+                resolve(null);
+            }
+        });
+        db.release();
+    })
+}

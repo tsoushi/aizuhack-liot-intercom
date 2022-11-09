@@ -2,7 +2,7 @@ import line from '@line/bot-sdk';
 import 'dotenv/config'; // このモジュールで.envから環境変数を設定する
 import { lineLogger } from '../logger.js';
 
-const client = new line.Client({
+export const client = new line.Client({
     channelAccessToken: process.env.channelAccessToken,
 });
 

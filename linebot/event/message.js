@@ -1,7 +1,7 @@
 // ファイル読み込み
 // import { audioEvent } from './message/audio.js';
 // import { fileEvent } from './message/file.js';
-// import { imageEvent } from './message/image.js';
+import { imageEvent } from './message/image.js';
 // import { locationEvent } from './message/location.js';
 // import { stickerEvent } from './message/sticker.js';
 import { textEvent } from './message/text.js';
@@ -20,7 +20,7 @@ export const messageFunc = async (event) => {
 
         // 画像
         case 'image': {
-            // message = imageEvent(event);
+            message = await imageEvent(event);
             break;
         }
 
