@@ -91,13 +91,14 @@ app.get('/intercom/get-message', async (req, res) => {
 //     url: [顔写真へのURL](existがtrueのときのみ)
 // }
 app.get('/intercom/recog-image-url', async (req, res) => {
-    const imageUrl = await utility.database.popFaceRecogImageQueue(req.query.id);
-    if (imageUrl === null) res.json({exist: false});
+    const data = await utility.database.popFaceRecogImageQueue(req.query.id);
+    if (data === null) res.json({exist: false});
     else {
-        systemLogger.debug(`IoT側へ顔認識用写真の登録 - deviceID: ${req.query.id} - url: ${imageUrl}`);
+        systemLogger.debug(`IoT側へ顔認識用写真の登録 - deviceID: ${req.query.id} - url: ${data['image_url']}`);
         res.json({
             exist: true,
-            url: imageUrl
+            url: data['image_url'],
+            name: data['name']
         });
     }
 });

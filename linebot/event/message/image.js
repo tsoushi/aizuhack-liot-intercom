@@ -41,10 +41,10 @@ export const imageEvent = async (event) => {
             // ファイル書き込み
             const url = await utility.func.genImageUrlFromBytes(data);
             
-            await utility.database.addFaceRecogImageQueue(await utility.database.getDeviceIDFromUserID(userId), url);
+            const id = await utility.database.addFaceRecogImageQueue(await utility.database.getDeviceIDFromUserID(userId), url);
 
-            await utility.database.deleteContext(userId);
-            return utility.makeMessage.text('登録しました');
+            await utility.database.setContext(userId, 'setRecogName:' + id); // 顔認識写真の名前登録モード
+            return utility.makeMessage.text('名前を入力してください');
         }
         return utility.makeMessage.text('登録に失敗しました');
     }

@@ -134,10 +134,20 @@ export const getReplyMessage = (deviceId) => {
 // 文脈を登録する
 // 引数: (ユーザーID, 文脈名)
 export const setContext = async (userId, context) => {
+    databaseLogger.trace('set context - ' + context);
     const db = await createConnection();
-    db.query('INSERT INTO context(user_id, context) VALUES(?, ?);', [userId, context], (err, result) => {
+    db.query('SELECT user_id, context FROM context WHERE user_id = ?;', [userId], (err, result) => {
         if (err) throw err;
-    });
+        if (result[0]) {
+            db.query('UPDATE context SET context = ? WHERE user_id = ?;', [context, userId], (err, result) => {
+                if (err) throw err;
+            });        
+        } else {
+            db.query('INSERT INTO context(user_id, context) VALUES(?, ?);', [userId, context], (err, result) => {
+                if (err) throw err;
+            });            
+        }
+    })
     db.release();
 }
 
@@ -211,10 +221,31 @@ export const removeVisitorImageLogByUrl = async (imageUrl) => {
 }
 
 // 顔認識用写真の送信キュー追加
-export const addFaceRecogImageQueue = async (deviceId, imageUrl) => {
-    databaseLogger.trace(`顔認識用写真の送信キュー追加 - url: ${imageUrl}`);
+// return: データベース上のレコードID(これを使用して、後で名前を登録する)
+export const addFaceRecogImageQueue = (deviceId, imageUrl) => {
+    return new Promise(async (resolve, reject) => {
+        databaseLogger.trace(`顔認識用写真の送信キュー追加 - url: ${imageUrl}`);
+        const db = await createConnection();
+        db.query('INSERT INTO face_recog_image_queue(device_id, image_url) VALUES(?, ?);', [deviceId, imageUrl], (err, result) => {
+            if (err) reject(err);
+            db.query('SELECT id FROM face_recog_image_queue WHERE image_url = ?;', [imageUrl], (err, result) => {
+                if (err) reject(err);
+                if (result[0]) {
+                    resolve(result[0]['id']);
+                } else {
+                    resolve(null);
+                }
+            })
+        });
+        db.release();
+    });
+}
+
+// 顔認識用写真の送信キューに名前を追加
+export const addFaceRecogName = async (id, name) => {
+    databaseLogger.trace(`顔認識用写真の送信キューに名前を追加 - name: ${name}`);
     const db = await createConnection();
-    db.query('INSERT INTO face_recog_image_queue(device_id, image_url) VALUES(?, ?);', [deviceId, imageUrl], (err, result) => {
+    db.query('UPDATE face_recog_image_queue SET name = ? WHERE id = ?;', [name, id], (err, result) => {
         if (err) throw err;
     });
     db.release();
@@ -224,12 +255,12 @@ export const addFaceRecogImageQueue = async (deviceId, imageUrl) => {
 export const popFaceRecogImageQueue = (deviceId) => {
     return new Promise(async (resolve, reject) => {
         const db = await createConnection();
-        db.query('SELECT id, device_id, image_url FROM face_recog_image_queue WHERE device_id = ? LIMIT 1;', [deviceId], (err, result) => {
+        db.query('SELECT id, device_id, image_url, name FROM face_recog_image_queue WHERE device_id = ? LIMIT 1;', [deviceId], (err, result) => {
             if (err) reject(err);
             if (result[0]) {
-                databaseLogger.trace(`顔認識用写真の送信キュー取り出し - deviceId: ${deviceId} - url: ${result[0]['image_url']}`);
+                databaseLogger.trace(`顔認識用写真の送信キュー取り出し - deviceId: ${deviceId} - url: ${result[0]['image_url']} - name: ${result[0]['name']}`);
                 db.query('DELETE FROM face_recog_image_queue WHERE id = ?;', result[0]['id']);
-                resolve(result[0]['image_url']);
+                resolve(result[0]);
             } else {
                 databaseLogger.trace(`顔認識用写真の送信キュー取り出し - deviceId: ${deviceId} - キューなし`);
                 resolve(null);

@@ -22,16 +22,26 @@ export const textEvent = async (event) => {
 
     lineLogger.debug('テキストメッセージを受信: ' + text);
 
-    if (await utility.database.getContext(userId) == "registerMode") {
+    const context = await utility.database.getContext(userId);
+    if (context == "registerMode") {
         utility.database.addDeviceID(userId, text);
         utility.database.deleteContext(userId);
         return utility.makeMessage.text(`デバイスID「${text}」を登録しました`);
     }
 
-    if (await utility.database.getContext(userId) == "talkMode") {
+    if (context == "talkMode") {
         utility.database.addReplyMessageByUserId(userId, text);
         utility.database.deleteContext(userId);
         return utility.makeMessage.text('メッセージを送信しました');
+    }
+
+    console.log(context);
+    if (context != null && context.startsWith('setRecogName:')) {
+        lineLogger.debug('顔認識写真の名前の登録')
+        utility.database.addFaceRecogName(Number(context.substr(13)), text);
+        utility.database.deleteContext(userId);
+
+        return utility.makeMessage.text('登録完了しました');
     }
 
     //メッセージのテキストごとに条件分岐
