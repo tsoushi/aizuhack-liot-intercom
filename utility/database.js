@@ -180,10 +180,10 @@ export const deleteContext = async (userId) => {
 }
 
 // ログに訪問者の画像を追加する
-export const addVisitorImageLog = async (deviceId, datetime, imageUrl) => {
+export const addVisitorImageLog = async (deviceId, datetime, imageUrl, name) => {
     databaseLogger.trace(`訪問者の画像をログに追加 - id: ${deviceId} datetime: ${datetime} url: ${imageUrl}`)
     const db = await createConnection();
-    db.query('INSERT INTO visitor_images(device_id, created_at, image_url) VALUES(?, ?, ?);', [deviceId, func.dateToDatabaseDate(datetime), imageUrl], (err, result) => {
+    db.query('INSERT INTO visitor_images(device_id, created_at, image_url, visitor_name) VALUES(?, ?, ?, ?);', [deviceId, func.dateToDatabaseDate(datetime), imageUrl, name], (err, result) => {
         if (err) throw err;
     });
     db.release();
@@ -194,14 +194,15 @@ export const getVisitorImageLog = (deviceId, limit=5) => {
     return new Promise(async (resolve, reject) => {
         databaseLogger.trace('訪問者の画像のログの取得')
         const db = await createConnection();
-        db.query('SELECT device_id, created_at, image_url FROM visitor_images WHERE device_id = ? ORDER BY created_at DESC LIMIT ?;', [deviceId, limit], (err, rows) => {
+        db.query('SELECT device_id, created_at, image_url, visitor_name FROM visitor_images WHERE device_id = ? ORDER BY created_at DESC LIMIT ?;', [deviceId, limit], (err, rows) => {
             if (err) throw err;
             const ret = [];
             for (const row of rows) {
                 ret.push({
                     deviceId: row['device_id'],
                     datetime: new Date(row['created_at']),
-                    imageUrl: row['image_url']
+                    imageUrl: row['image_url'],
+                    name: row['visitor_name']
                 });
             }
             databaseLogger.trace('訪問者の画像のログの取得 -> 完了: ' + ret.length + ' 件');

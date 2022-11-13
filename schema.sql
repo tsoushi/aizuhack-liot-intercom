@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS context(
 CREATE TABLE IF NOT EXISTS visitor_images(
     device_id TEXT,
     created_at TEXT,
-    image_url TEXT
+    image_url TEXT,
+    visitor_name TEXT
 );
 CREATE TABLE IF NOT EXISTS face_recog_image_queue(
     id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,

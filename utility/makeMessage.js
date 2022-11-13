@@ -6,7 +6,8 @@ export const text = (text) => {
 }
 
 // 訪問者の写真ビュー用のメッセージを生成する
-export const visitorsImage = (imageUrl, date) => {
+export const visitorsImage = (imageUrl, date, name) => {
+    if (name == 'unknown') name = '訪問者';
     return {
         type: 'flex',
         altText: 'This is a Flex Message',
@@ -18,7 +19,7 @@ export const visitorsImage = (imageUrl, date) => {
               contents: [
                 {
                   type: "text",
-                  text: "訪問者が来ました",
+                  text: name + "が来ました",
                   weight: "bold",
                   color: "#ffffff"
                 }
@@ -87,7 +88,7 @@ export const visitorsImage = (imageUrl, date) => {
     }
 }
 
-const visitorsImageBubble = (imageUrl, date) => {
+const visitorsImageBubble = (imageUrl, date, name) => {
     return {
         type: "bubble",
         header: {
@@ -96,7 +97,7 @@ const visitorsImageBubble = (imageUrl, date) => {
           contents: [
             {
               type: "text",
-              text: date,
+              text: name,
               weight: "bold",
               color: "#ffffff"
             }
@@ -107,6 +108,19 @@ const visitorsImageBubble = (imageUrl, date) => {
           type: "box",
           layout: "vertical",
           contents: [
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "text",
+                  text: date,
+                  color: "#999999"
+                }
+              ],
+              paddingStart: "10px",
+              paddingBottom: "10px"
+            },
             {
               type: "image",
               url: imageUrl,
@@ -158,7 +172,8 @@ export const visitorsImageLog = (records) => {
         message.contents.contents.push(
             visitorsImageBubble(
                 record.imageUrl,
-                record.datetime.toLocaleString('ja-JP', {timeZone: 'Asia/Tokyo'})
+                record.datetime.toLocaleString('ja-JP', {timeZone: 'Asia/Tokyo'}),
+                record.name
             )
         );
     }

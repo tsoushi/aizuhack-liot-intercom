@@ -60,8 +60,8 @@ app.post('/intercom/image', express.json({limit: '10mb'}), (req, res) => {
     const data = Buffer.from(req.body.data, 'base64');
     utility.func.genImageUrlFromBytes(data, req)
         .then((imageUrl) => {
-            utility.database.addVisitorImageLog(req.body.id, new Date(req.body.datetime), imageUrl);
-            const message = utility.makeMessage.visitorsImage(imageUrl, utility.func.dateToLocaleString(new Date(req.body.datetime)));
+            utility.database.addVisitorImageLog(req.body.id, new Date(req.body.datetime), imageUrl, req.body.name);
+            const message = utility.makeMessage.visitorsImage(imageUrl, utility.func.dateToLocaleString(new Date(req.body.datetime)), req.body.name);
             utility.database.getUserIDsFromDeviceID(req.body.id).then((userIds) => {
                 utility.lineClient.multicast(userIds, message).catch(() => {});
             })
